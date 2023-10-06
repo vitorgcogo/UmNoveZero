@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, addDoc, orderBy, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../config/firebase';  // Ajuste para o seu caminho de configuração
 
 const Chamados = () => {
