@@ -47,7 +47,7 @@ const Historico = () => {
             {rooms.map(room => (
                 <div key={room.id} className="conversation-item">
                     <a className="conversation-link" href={`/chat/${room.id}`}>
-                        <span className="conversation-text">{room.name}</span>
+                        <span className="conversation-text">Ticket - {room.id}</span>
                     </a>
                 </div>
             ))}

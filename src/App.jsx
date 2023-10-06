@@ -5,11 +5,13 @@ import Principal from "./pages/Principal";
 import AuthRoute from "./AuthRoute";
 import Login from "./pages/Login";
 import Layout from "./pages/Layout";
-import ChatComponent from "./pages/ChatComponent";
-import Chat from "./pages/Chat";
+// import ChatComponent from "./pages/ChatComponent";
+// import Chat from "./pages/Chat";
 import ChatComponent2 from "./pages/Chat/ChatComponent";
 import Historico from "./pages/Chat/Historico";
 import PoliceDashboard from "./pages/PoliceDashboard";
+import ChatPolice from "./pages/Chat/Policia/ChatPolice";
+import Chamados from "./pages/Chat/Policia/chamados";
 
 const App = () => {
   return (
@@ -30,7 +32,11 @@ const App = () => {
             <Route path="/police" element={<PoliceDashboard />} />
 
           </Route>
-          <Route index path="/chat/:roomId" element={<ChatComponent2 />} />
+          <Route path="/chat/:roomId" element={<ChatComponent2 />} />
+
+          <Route path="/chamado" element={<Chamados />} />
+          <Route path="/chamado/:roomId" element={<ChatPolice />} />
+
 
 
           {/* <Route index path="/" element={<Principal />} /> */}

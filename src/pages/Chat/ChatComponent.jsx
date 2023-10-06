@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { collection, addDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, orderBy, query, doc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { enviarDados } from '../../Api/Ocorrencia';
+import { enviarDados, updateStatus } from '../../Api/Ocorrencia';
 
 
 const ChatComponent2 = () => {
@@ -14,6 +14,7 @@ const ChatComponent2 = () => {
     const [newMessage, setNewMessage] = useState('');
     const [awaitingDescription, setAwaitingDescription] = useState(false);
     const [showRestartButton, setShowRestartButton] = useState(false);
+    const [status, setStatus] = useState(null);
 
     const [description, setDescription] = useState('');
 
@@ -28,26 +29,34 @@ const ChatComponent2 = () => {
     }, [messages]);
 
     useEffect(() => {
-        if (roomId) {
-            const messagesCollection = query(
-                collection(db, 'conversations', roomId, 'messages'),
-                orderBy('timestamp', 'asc')
-            );
 
-            const unsubscribe = onSnapshot(messagesCollection, (snapshot) => {
-                const fetchedMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setMessages(fetchedMessages);
-            });
+        const roomRef = doc(db, 'conversations', roomId);
+        const unsubscribeRoom = onSnapshot(roomRef, (snapshot) => {
+            setStatus(snapshot.data().status);
+        });
 
+        const messagesCollection = query(
+            collection(db, 'conversations', roomId, 'messages'),
+            orderBy('timestamp', 'asc')
+        );
+
+        const unsubscribeMessages = onSnapshot(messagesCollection, (snapshot) => {
+            const fetchedMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setMessages(fetchedMessages);
+        });
+
+        if (status === null) {
             axios.get('http://localhost:5000/welcome_message')
                 .then(response => {
                     setMessages(prevMessages => [...prevMessages, { text: response.data.response, sender: 'bot', timestamp: new Date() }]);
                 });
-
-
-            return () => unsubscribe();
         }
-    }, [roomId]);
+
+        return () => {
+            unsubscribeRoom();
+            unsubscribeMessages();
+        };
+    }, [roomId, status]);
 
     const sendMessage = async () => {
         if (newMessage.trim() !== '') {
@@ -57,6 +66,7 @@ const ChatComponent2 = () => {
                 roomId: roomId,
                 timestamp: new Date()
             });
+
             setDescription(newMessage)
             setNewMessage('');
 
@@ -94,19 +104,42 @@ const ChatComponent2 = () => {
         }
     };
 
-    const handleOptionClick = (option) => {
+    const handleOptionClick = async (option) => {
         if (option === "Sim") {
-            setMessages(prevChat => [...prevChat, { text: "Sim", sender: 'user' }]);
-            setMessages(prevChat => [...prevChat, { text: "Por favor, descreva o ocorrido.", sender: 'bot' }]);
+            await addDoc(collection(db, 'conversations', roomId, 'messages'), {
+                text: "Sim",
+                sender: 'user',
+                roomId: roomId,
+                timestamp: new Date()
+            });
+
+            await addDoc(collection(db, 'conversations', roomId, 'messages'), {
+                text: "Por favor, descreva o ocorrido.",
+                sender: 'bot',
+                roomId: roomId,
+                timestamp: new Date()
+            });
             setAwaitingDescription(true);
         } else {
-            setMessages(prevChat => [...prevChat, { text: "Não", sender: 'user' }]);
-            setMessages(prevChat => [...prevChat, { text: "Obrigado pela conversa. ", sender: 'bot' }]);
+            await addDoc(collection(db, 'conversations', roomId, 'messages'), {
+                text: "Não",
+                sender: 'user',
+                roomId: roomId,
+                timestamp: new Date()
+            });
+
+            await addDoc(collection(db, 'conversations', roomId, 'messages'), {
+                text: "Obrigado pela conversa. ",
+                sender: 'bot',
+                roomId: roomId,
+                timestamp: new Date()
+            });
+            updateStatus(roomId, 'cancel')
+
             setShowRestartButton(true);
-
-
         }
     };
+
 
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
@@ -118,8 +151,8 @@ const ChatComponent2 = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async position => {
 
-                enviarDados(messages, description, position.coords.latitude, position.coords.longitude)
-
+                enviarDados(roomId, newMessage, position.coords.latitude, position.coords.longitude)
+                updateStatus(roomId, 'Espera')
                 setMessages(prevChat => [...prevChat, { text: "Localização registrada. Obrigado por informar.", sender: 'bot' }]);
             });
         } else {
@@ -131,14 +164,14 @@ const ChatComponent2 = () => {
         <div className="chat-container">
             <div className="chat-header" onClick={() => navigate(-1)}>
                 <i className=" back-icon bi bi-chevron-left"></i>
-                <h3 >Ticket #{roomId}</h3>
+                <h3 >Tickets #{roomId}</h3>
             </div>
             <div className="message-list" id='t'>
 
                 {messages.map((msg, index) => (
                     <div key={msg.id} className={msg.sender}>
                         {msg.text}
-                        {msg.type === 'option' && (
+                        {msg.type === 'option' &&  status == null && (
                             <div className="options">
                                 <button className='btn btn-primary mx-2' onClick={() => handleOptionClick("Sim")}>Sim</button>
                                 <button className='btn btn-danger mx-2' onClick={() => handleOptionClick("Não")}>Não</button>
@@ -148,12 +181,21 @@ const ChatComponent2 = () => {
                 ))}
                 <div ref={endOfChatRef}></div>
             </div>
+            
             <form className="message-form" onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
-                <input className="message-input" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Digite sua mensagem" />
-                <button className="send-button" type="submit">Enviar</button>
+                {status == null ?
+                    <>
+                        <input className="message-input" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Digite sua mensagem" />
+                        <button className="send-button" type="submit">Enviar</button>
+                    </>
+                    :
+                    status == 'Espera' ?
+                        <p>Seu chamado foi enviado com Sucesso. Aguarde a Resposta.</p>
+                        :
+                        <p>Esse chat foi encerrado!</p>
+                }
             </form>
         </div>
     );
 };
-
 export default ChatComponent2;

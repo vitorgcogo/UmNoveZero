@@ -260,6 +260,14 @@ body{
     border-top: 1px solid #ccc;
 }
 
+.message-form p{
+    color: #000;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0px;
+    text-align: center;
+}
+
 .message-input {
     flex: 1;
     padding: 10px;
@@ -339,6 +347,8 @@ body{
 .chat-header h3 {
     margin: 0px;
     color: #1c0747;
+    font-size: 16px;
+    font-weight: 600;
 }
 
 
@@ -439,3 +449,6 @@ body{
 .police-message-decline:hover {
     background-color: #e53e3e; /* uma variação mais escura para o hover */
 }
+
+
+
