@@ -28,8 +28,8 @@ const Chamados = () => {
             <h3>Chamados</h3>
             {rooms.map(room => (
                 <div key={room.id} className="conversation-item">
-                    <a className="conversation-link" href={`/chamado/${room.id}`}>
-                        <span className="conversation-text">{room.name}</span>
+                    <a className="conversation-link" href={`/admin/chamado/${room.id}`}>
+                        <span className="conversation-text">Chamado {room.id} </span>
                     </a>
                 </div>
             ))}

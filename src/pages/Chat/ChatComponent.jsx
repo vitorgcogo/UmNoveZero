@@ -164,7 +164,7 @@ const ChatComponent2 = () => {
         <div className="chat-container">
             <div className="chat-header" onClick={() => navigate(-1)}>
                 <i className=" back-icon bi bi-chevron-left"></i>
-                <h3 >Tickets #{roomId}</h3>
+                <h3 >Chamados #{roomId}</h3>
             </div>
             <div className="message-list" id='t'>
 

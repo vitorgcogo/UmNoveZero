@@ -27,10 +27,7 @@ const logInWithEmailAndPassword = async (email, password, setResponse) => {
         status: 200,
         message: "Sucesso!",
       });
-      console.log('Jonas 1')
-
     } else {
-      console.log('Jonas')
       setResponse({
         status: 400,
         message: "Você não tem permissão para acessar essa área.",
@@ -38,7 +35,36 @@ const logInWithEmailAndPassword = async (email, password, setResponse) => {
       signOut(getAuth());
     }
   } catch (e) {
-    console.log('Jonas 3')
+
+    setResponse({
+      status: 400,
+      message: VerifyErroCode(e.code),
+    });
+    signOut(getAuth());
+  }
+};
+
+const logInWithEmailAndPasswordAdmin = async (email, password, setResponse) => {
+  const auth = getAuth();
+  
+  try {
+    const q = query(collection(db, "usuarios"), where("email", "==", email), where('isAdmin', '==', true));
+    const docs = await getDocs(q);
+    
+    if (docs.docs.length === 1) {
+      await signInWithEmailAndPassword(auth, email, password);
+      setResponse({
+        status: 200,
+        message: "Sucesso!",
+      });
+    } else {
+      setResponse({
+        status: 400,
+        message: "Você não tem permissão para acessar essa área.",
+      });
+      signOut(getAuth());
+    }
+  } catch (e) {
 
     setResponse({
       status: 400,
@@ -117,4 +143,5 @@ export {
   storage,
   logInWithEmailAndPassword,
   registerWithEmailAndPassword,
+  logInWithEmailAndPasswordAdmin
 };

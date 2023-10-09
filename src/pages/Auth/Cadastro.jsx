@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { logInWithEmailAndPassword } from '../config/firebase';
+import { logInWithEmailAndPassword, registerWithEmailAndPassword } from '../../config/firebase';
 
-function Login() {
+function Cadastro() {
     const [inputs, setInputs] = useState({});
     const [erros, setErros] = useState({});
     const [response, setResponse] = useState({});
@@ -16,6 +16,8 @@ function Login() {
     }
 
     const validator = yup.object().shape({
+        nome: yup.string().required("Nome é obrigatório"),
+        telefone: yup.string().required("Telefone é obrigatório"),
         email: yup.string().email("E-mail inválido.").required('E-email é obrigatório'),
         senha: yup.string().required("Senha é obrigatório")
     });
@@ -29,7 +31,7 @@ function Login() {
     function validar() {
         validator.validate(inputs, { abortEarly: false }).then(() => {
             setErros({});
-            logInWithEmailAndPassword(inputs?.email, inputs?.senha, setResponse);
+            registerWithEmailAndPassword(inputs?.nome, inputs?.email, inputs?.senha, inputs?.telefone, setResponse);
         }).catch((error) => {
             setErros({});
             error.inner.forEach((err) => {
@@ -47,7 +49,7 @@ function Login() {
         if (response.status === 400) {
             setModalOpen(true);
         } else if (response.status === 200) {
-            navigate("/");
+            navigate("/login");
         }
     }, [response]);
 
@@ -58,18 +60,25 @@ function Login() {
                     <div className="col-md-6">
                         <div className="card">
                             <div className="card-body">
-                                <h5 className="card-title text-center mb-4">Login</h5>
+                                <h5 className="card-title text-center mb-4">Cadastro</h5>
                                 <form onSubmit={handleSubmit}>
                                     <div className="mb-3">
+                                        <label htmlFor="nome" className="form-label">Nome</label>
+                                        <input type="text" className="form-control" name="nome" id="nome" aria-describedby="nomeHelp" onChange={handleChange} value={inputs?.nome} required />
+                                    </div>
+                                    <div className="mb-3">
                                         <label htmlFor="email" className="form-label">Endereço de email</label>
-                                        <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} />
-                                        <div id="emailHelp" className="form-text">Nós nunca compartilharemos seu email com ninguém.</div>
+                                        <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} required />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="telefone" className="form-label">Telefone</label>
+                                        <input type="text" className="form-control" name="telefone" id="telefone" aria-describedby="telefoneHelp" onChange={handleChange} value={inputs?.telefone} required />
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="password" className="form-label">Senha</label>
-                                        <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} />
+                                        <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} required />
                                     </div>
-                                    <button type="submit" className="btn btn-primary w-100">Entrar</button>
+                                    <button type="submit" className="btn btn-primary w-100">Cadastrar</button>
                                 </form>
                             </div>
                         </div>
@@ -100,4 +109,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default Cadastro;

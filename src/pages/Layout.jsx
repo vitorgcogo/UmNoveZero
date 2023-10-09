@@ -13,9 +13,12 @@ const Layout = () => {
                         </NavLink>
                         <NavLink to="/historico" className="navbar-brand" activeClassName="active-link">
                             <i className="bi bi-chat-left-text"></i>
-                        </NavLink> 
-                        
-                     </div>
+                        </NavLink>
+                        <NavLink to="/perfil" className="navbar-brand" activeClassName="active-link">
+                            <i className="bi bi-person-circle"></i>
+                        </NavLink>
+
+                    </div>
                 </nav>
             </div>
         </>

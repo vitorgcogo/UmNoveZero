@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth } from "./config/firebase";
+import { auth } from "../config/firebase";
 
-const AuthRoute= (props) => {
+const AuthRouteAdmin= (props) => {
+   
 
     const { children } = props;
     const navigate = useNavigate();
@@ -26,4 +27,4 @@ const AuthRoute= (props) => {
     return <>{children}</>;
 };
 
-export default AuthRoute;
+export default AuthRouteAdmin;
