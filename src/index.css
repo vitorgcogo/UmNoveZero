@@ -129,6 +129,9 @@ body{
   body, h3, p {
     color: #ffffff;  /* branco ou outra cor clara de sua escolha */
 }
+h3 {
+    text-align: center
+}
 
 
   /*Chat*/
@@ -309,7 +312,7 @@ body{
     display: flex;
     align-items: center;
     padding: 15px 0;
-    border-bottom: 1px solid #e2e2e2;
+    border: 2px solid #e2e2e2;
     transition: background-color 0.3s;
 }
 
@@ -345,6 +348,7 @@ body{
 }
 
 .chat-header h3 {
+    text-align: center;
     margin: 0px;
     color: #1c0747;
     font-size: 16px;
@@ -360,7 +364,7 @@ body{
 .add-conversation-button {
     position: fixed;
     right: 20px;
-    bottom: 20px;
+    bottom: 65px;
     width: 60px;
     height: 60px;
     background-color: #34B7F1;

@@ -9,6 +9,8 @@ function Login() {
     const [response, setResponse] = useState({});
     const [modalOpen, setModalOpen] = useState(false);
 
+    const [isAdmin, setIsAdmin] = useState(false);
+
     const navigate = useNavigate();
 
     function closeModal() {
@@ -26,13 +28,14 @@ function Login() {
         setInputs({ ...inputs, [name]: value });
     }
 
-    function validar() {
+    function validar(isAdminAttempt = false) {
         validator.validate(inputs, { abortEarly: false }).then(() => {
             setErros({});
-            console.log('aaa', inputs?.status)
-
-            logInWithEmailAndPassword(inputs?.email, inputs?.senha, setResponse);
-
+            if(isAdminAttempt) {
+                logInWithEmailAndPasswordAdmin(inputs?.email, inputs?.senha, setResponse);
+            } else {
+                logInWithEmailAndPassword(inputs?.email, inputs?.senha, setResponse);
+            }
         }).catch((error) => {
             setErros({});
             error.inner.forEach((err) => {
@@ -40,47 +43,33 @@ function Login() {
             });
         });
     }
-
-    function validar2() {
-        validator.validate(inputs, { abortEarly: false }).then(() => {
-            setErros({});
-
-            logInWithEmailAndPasswordAdmin(inputs?.email, inputs?.senha, setResponse);
-
-
-
-
-        }).catch((error) => {
-            setErros({});
-            error.inner.forEach((err) => {
-                setErros((prevErros) => ({ ...prevErros, [err.path]: err.message }));
-            });
-        });
-    }
-
+    
     function handleSubmit(e) {
         e.preventDefault();
         validar();
     }
-
+    
     function handleSubmit2(e) {
         e.preventDefault();
-        validar2();
+        validar(true);
     }
+    
 
     useEffect(() => {
-        console.log('aaa', inputs?.status)
-
         if (response.status === 400) {
             setModalOpen(true);
         } else if (response.status === 200) {
-            if (inputs?.status == 'padrao') {
-                navigate("/");
-            } else {
+            setIsAdmin(response.isAdmin);
+            if (response.isAdmin) {
                 navigate("/admin");
+            } else {
+                navigate("/");
             }
         }
     }, [response]);
+    
+    
+    
 
     return (
         <>
@@ -106,7 +95,6 @@ function Login() {
                                                 <input type="hidden" name='status' id='status' value={'padrao'} />
                                                 <label htmlFor="email" className="form-label">Endereço de email</label>
                                                 <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} />
-                                                <div id="emailHelp" className="form-text">Nós nunca compartilharemos seu email com ninguém.</div>
                                             </div>
                                             <div className="mb-3">
                                                 <label htmlFor="password" className="form-label">Senha</label>
@@ -136,7 +124,7 @@ function Login() {
                                                 <label htmlFor="password" className="form-label">Senha</label>
                                                 <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} />
                                             </div>
-                                            <button type="submit" className="btn btn-primary w-100">Entrar</button>
+                                            <button type="submit" className="btn btn-primary w-100">Entrar como Administrador</button>
                                         </form>
                                     </div>
                                 </div>

@@ -15,27 +15,25 @@ const analytics = getAnalytics(app);
 
 
 const logInWithEmailAndPassword = async (email, password, setResponse) => {
-  const auth = getAuth();
-  
   try {
     const q = query(collection(db, "usuarios"), where("email", "==", email));
     const docs = await getDocs(q);
-    
     if (docs.docs.length === 1) {
       await signInWithEmailAndPassword(auth, email, password);
+      const data = docs.docs[0].data();
       setResponse({
         status: 200,
         message: "Sucesso!",
+        isAdmin: data.isAdmin
       });
     } else {
       setResponse({
         status: 400,
-        message: "Você não tem permissão para acessar essa área.",
+        message: "Credenciais inválidas.",
       });
       signOut(getAuth());
     }
   } catch (e) {
-
     setResponse({
       status: 400,
       message: VerifyErroCode(e.code),
@@ -46,17 +44,15 @@ const logInWithEmailAndPassword = async (email, password, setResponse) => {
 
 const logInWithEmailAndPasswordAdmin = async (email, password, setResponse) => {
   const auth = getAuth();
-  
+
   try {
     const q = query(collection(db, "usuarios"), where("email", "==", email), where('isAdmin', '==', true));
     const docs = await getDocs(q);
-    
+
     if (docs.docs.length === 1) {
       await signInWithEmailAndPassword(auth, email, password);
-      setResponse({
-        status: 200,
-        message: "Sucesso!",
-      });
+      return docs.docs[0].data(); // retornar dados do usuário
+
     } else {
       setResponse({
         status: 400,

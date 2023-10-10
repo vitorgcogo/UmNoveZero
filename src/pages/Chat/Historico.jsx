@@ -44,10 +44,11 @@ const Historico = () => {
     return (
         <div className="conversation-list">
             <h3>Conversas</h3>
+            <p></p>
             {rooms.map(room => (
                 <div key={room.id} className="conversation-item">
                     <a className="conversation-link" href={`/chat/${room.id}`}>
-                        <span className="conversation-text">Ticket - {room.id}</span>
+                        <span className="conversation-text">Chamado - {room.id}</span>
                     </a>
                 </div>
             ))}
