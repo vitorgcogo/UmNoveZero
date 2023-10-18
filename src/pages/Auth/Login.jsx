@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { logInWithEmailAndPassword, logInWithEmailAndPasswordAdmin } from '../../config/firebase';
+import { logInWithEmailAndPassword } from '../../config/firebase';
 
 function Login() {
     const [inputs, setInputs] = useState({});
     const [erros, setErros] = useState({});
     const [response, setResponse] = useState({});
     const [modalOpen, setModalOpen] = useState(false);
-
-    const [isAdmin, setIsAdmin] = useState(false);
 
     const navigate = useNavigate();
 
@@ -28,14 +26,10 @@ function Login() {
         setInputs({ ...inputs, [name]: value });
     }
 
-    function validar(isAdminAttempt = false) {
+    function validar() {
         validator.validate(inputs, { abortEarly: false }).then(() => {
             setErros({});
-            if(isAdminAttempt) {
-                logInWithEmailAndPasswordAdmin(inputs?.email, inputs?.senha, setResponse);
-            } else {
-                logInWithEmailAndPassword(inputs?.email, inputs?.senha, setResponse);
-            }
+            logInWithEmailAndPassword(inputs?.email, inputs?.senha, setResponse);
         }).catch((error) => {
             setErros({});
             error.inner.forEach((err) => {
@@ -43,23 +37,16 @@ function Login() {
             });
         });
     }
-    
+
     function handleSubmit(e) {
         e.preventDefault();
         validar();
     }
-    
-    function handleSubmit2(e) {
-        e.preventDefault();
-        validar(true);
-    }
-    
 
     useEffect(() => {
         if (response.status === 400) {
             setModalOpen(true);
         } else if (response.status === 200) {
-            setIsAdmin(response.isAdmin);
             if (response.isAdmin) {
                 navigate("/admin");
             } else {
@@ -67,72 +54,30 @@ function Login() {
             }
         }
     }, [response]);
-    
-    
-    
 
     return (
         <>
             <div className="container mt-5">
-                <ul class="nav nav-tabs" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Padrão</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Administrador</a>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                        <div className="row justify-content-center">
-                            <div className="col-md-6">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <h5 className="card-title text-center mb-4">Login</h5>
-                                        <form onSubmit={handleSubmit}>
-                                            <div className="mb-3">
-                                                <input type="hidden" name='status' id='status' value={'padrao'} />
-                                                <label htmlFor="email" className="form-label">Endereço de email</label>
-                                                <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label htmlFor="password" className="form-label">Senha</label>
-                                                <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} />
-                                            </div>
-                                            <button type="submit" className="btn btn-primary w-100">Entrar</button>
-                                        </form>
+                <div className="row justify-content-center">
+                    <div className="col-md-6">
+                        <div className="card">
+                            <div className="card-body">
+                                <h5 className="card-title text-center mb-4">Login</h5>
+                                <form onSubmit={handleSubmit}>
+                                    <div className="mb-3">
+                                        <label htmlFor="email" className="form-label">Endereço de email</label>
+                                        <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} />
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                        <div className="row justify-content-center">
-                            <div className="col-md-6">
-                                <div className="card">
-                                    <div className="card-body">
-                                        <h5 className="card-title text-center mb-4">Login Administrador</h5>
-                                        <form onSubmit={handleSubmit2}>
-                                            <input type="hidden" name='status' id='status' value={'admin'} />
-
-                                            <div className="mb-3">
-                                                <label htmlFor="email" className="form-label">Endereço de email</label>
-                                                <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} />
-                                            </div>
-                                            <div className="mb-3">
-                                                <label htmlFor="password" className="form-label">Senha</label>
-                                                <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} />
-                                            </div>
-                                            <button type="submit" className="btn btn-primary w-100">Entrar como Administrador</button>
-                                        </form>
+                                    <div className="mb-3">
+                                        <label htmlFor="password" className="form-label">Senha</label>
+                                        <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} />
                                     </div>
-                                </div>
+                                    <button type="submit" className="btn btn-primary w-100">Entrar</button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
             {modalOpen && response && (

@@ -135,7 +135,7 @@ const ChatPolice = () => {
                     </div>
 
                     <div className="col-md-6 mb-4">
-                        <div id="map" style={{ width: '100%', height: '50vh', marginTop: '20px' }}></div>
+                        <div id="map" style={{ width: '100%', height: '40vh', marginTop: '20px' }}></div>
                     </div>
 
                     {data.status == true || data.status == false ?

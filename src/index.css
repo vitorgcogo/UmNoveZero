@@ -127,7 +127,7 @@ body{
   }
 
   body, h3, p {
-    color: #ffffff;  /* branco ou outra cor clara de sua escolha */
+    color: #000000;  /* branco ou outra cor clara de sua escolha */
 }
 h3 {
     text-align: center

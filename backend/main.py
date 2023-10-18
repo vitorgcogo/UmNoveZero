@@ -14,7 +14,7 @@ CORS(app)
 
 intents = {
     'saudacao': {
-        'patterns': ['oi', 'olá', 'boa tarde', 'boa noite', 'e aí', 'bom dia', 'ei'],
+        'patterns': ['oi oi', 'olá olá', 'boa tarde', 'boa noite', 'e aí', 'bom dia', 'ei', 'oi', 'oi chat'],
         'responses': ['Olá, como posso ajudar?', 'Oi, o que posso fazer por você hoje?', 'Olá, em que posso ser útil?']
     },
     'relatar_crime': {

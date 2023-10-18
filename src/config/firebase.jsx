@@ -14,6 +14,22 @@ export const db = getFirestore(app);
 const analytics = getAnalytics(app);
 
 
+const getUserData = async (uid) => {
+  try {
+      const userDocRef = doc(db, 'usuarios', uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+          return userDoc.data();
+      } else {
+          return null;
+      }
+  } catch (error) {
+      console.error("Erro ao buscar dados do usuário:", error);
+      return null;
+  }
+};
+
 const logInWithEmailAndPassword = async (email, password, setResponse) => {
   try {
     const q = query(collection(db, "usuarios"), where("email", "==", email));
@@ -41,6 +57,23 @@ const logInWithEmailAndPassword = async (email, password, setResponse) => {
     signOut(getAuth());
   }
 };
+
+// const logInWithEmailAndPassword = async (email, password, setResponse) => {
+//   try {
+//     await signInWithEmailAndPassword(auth, email, password);
+//     setResponse({
+//       status: 200,
+//       message: "Sucesso!"
+//     });
+//   } catch (e) {
+//     console.error("Erro ao fazer login:", e); // Mostrar o erro completo
+//     setResponse({
+//       status: 400,
+//       message: VerifyErroCode(e.code),
+//     });
+//   }
+// };
+
 
 const logInWithEmailAndPasswordAdmin = async (email, password, setResponse) => {
   const auth = getAuth();
@@ -139,5 +172,6 @@ export {
   storage,
   logInWithEmailAndPassword,
   registerWithEmailAndPassword,
-  logInWithEmailAndPasswordAdmin
+  logInWithEmailAndPasswordAdmin,
+  getUserData
 };

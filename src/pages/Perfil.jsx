@@ -1,20 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { signOut, getAuth } from 'firebase/auth';
-import { auth } from '../config/firebase';  // Ajuste para o caminho correto de sua configuração do Firebase
 import { useNavigate } from 'react-router-dom';
+import { getUserData, auth } from '../config/firebase';
 
-const Perfil = ({ user }) => {
+const Perfil = () => {
+    const [userData, setUserData] = useState({});
+    const navigate = useNavigate();
 
-    const navigate = useNavigate()
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const user = getAuth().currentUser;
+
+            if (user) {
+                const data = await getUserData(user.uid);
+                if (data) {
+                    setUserData(data);
+                }
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
     const handleSignOut = async () => {
         try {
-            signOut(getAuth());
+            signOut(auth);
             navigate("/login");
-
         } catch (error) {
             console.error("Erro ao deslogar:", error);
         }
-    }
+    };
 
     return (
         <div className="container mt-5">
@@ -25,7 +40,9 @@ const Perfil = ({ user }) => {
                             Perfil
                         </div>
                         <div className="card-body">
-                            <h5 className="card-title">Nome: {getAuth().currentUser?.displayName}</h5>
+                            <h5 className="card-title">Nome: {userData.nome || 'N/A'}</h5>
+                            <p>Email: {userData.email || 'N/A'}</p>
+                            <p>Telefone: {userData.telefone || 'N/A'}</p>
                             <button className="btn btn-danger" onClick={handleSignOut}>Deslogar</button>
                         </div>
                     </div>
