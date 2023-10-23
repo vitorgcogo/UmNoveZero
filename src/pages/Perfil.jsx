@@ -40,9 +40,9 @@ const Perfil = () => {
                             Perfil
                         </div>
                         <div className="card-body">
-                            <h5 className="card-title">Nome: {userData.nome || 'N/A'}</h5>
-                            <p>Email: {userData.email || 'N/A'}</p>
-                            <p>Telefone: {userData.telefone || 'N/A'}</p>
+                            <h5 className="card-title">Nome: {userData?.nome || 'N/A'}</h5>
+                            <p className='black-text'>Email: {userData?.email || 'N/A'}</p>
+                            <p className='black-text'>Telefone: {userData?.telefone || 'N/A'}</p>
                             <button className="btn btn-danger" onClick={handleSignOut}>Deslogar</button>
                         </div>
                     </div>

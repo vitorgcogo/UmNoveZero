@@ -1,50 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, orderBy, query } from 'firebase/firestore';
-import { db } from '../../config/firebase';  // Ajuste para o seu caminho de configuração
+import { collection, getDocs, addDoc, orderBy, query, where } from 'firebase/firestore';
+import { db, auth } from '../../config/firebase';
 
 const Historico = () => {
     const [rooms, setRooms] = useState([]);
-    const [newRoom, setNewRoom] = useState('');
 
     useEffect(() => {
         const fetchRooms = async () => {
-            const roomsCollection = query(
-                collection(db, 'conversations'),
-                orderBy('timestamp', 'desc') // Ordenando pela timestamp em ordem decrescente
-            );
+            if(auth.currentUser) {
+                const userId = auth.currentUser.uid; // Obtenha o UID do usuário autenticado
 
-            const roomsSnapshot = await getDocs(roomsCollection);
-            setRooms(roomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                const roomsCollection = query(
+                    collection(db, 'conversations'),
+                    where('userId', '==', userId),  // Filtra conversas pelo ID do usuário
+                    orderBy('timestamp', 'desc') // Ordenando pela timestamp em ordem decrescente
+                );
+
+                const roomsSnapshot = await getDocs(roomsCollection);
+                setRooms(roomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            } else {
+                console.error("Nenhum usuário autenticado.");
+            }
         };
+
         fetchRooms();
     }, []);
 
-
     const createNewConversation = async () => {
-        const newRoomRef = await addDoc(collection(db, 'conversations'), {
-            name: "Ticket " + (rooms.length + 1),
-            timestamp: new Date()  // Adicione isso para ajudar na ordenação
-        });
+        if (!auth.currentUser) {
+            console.error("Nenhum usuário autenticado.");
+            return;
+        }
 
-        // Quando você cria uma nova sala de chat (ou ticket):
+        const userId = auth.currentUser.uid;
+
+        const newRoomRef = await addDoc(collection(db, 'conversations'), {
+            name: "Chamado " + (rooms.length + 1),
+            timestamp: new Date(),
+            userId: userId
+        });
 
         const roomId = newRoomRef.id;
 
-        // Adicione imediatamente a mensagem inicial do bot a essa sala de chat:
         await addDoc(collection(db, 'conversations', roomId, 'messages'), {
-            text: "Olá! Como posso ajudar?",  // ou sua mensagem de boas-vindas padrão
+            text: "Olá! Como posso ajudar?",
             sender: 'bot',
             timestamp: new Date()
         });
 
-        // Redireciona o usuário para a nova conversa
         window.location.href = `/chat/${newRoomRef.id}`;
     };
 
     return (
         <div className="conversation-list">
             <h3>Conversas</h3>
-            <p></p>
             {rooms.map(room => (
                 <div key={room.id} className="conversation-item">
                     <a className="conversation-link" href={`/chat/${room.id}`}>
@@ -58,4 +67,5 @@ const Historico = () => {
         </div>
     );
 };
+
 export default Historico;
