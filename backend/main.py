@@ -23,7 +23,7 @@ intents = {
         'action': 'prompt_details'
     },
     'emergencia': {
-        'patterns': ['preciso de ajuda', 'estou em perigo', 'socorro', 'estou sendo atacado', 'alguém está me seguindo', 'ouvi tiros'],
+        'patterns': ['invadiram minha casa', 'invadiram meu apartamento', 'preciso de ajuda', 'estou em perigo', 'socorro', 'estou sendo atacado', 'alguém está me seguindo', 'ouvi tiros'],
         'responses': ['Estamos enviando ajuda imediatamente. Por favor, fique seguro.', 'Permaneça onde está. Ajuda está a caminho.', 'Entendi. Mantenha-se em um local seguro enquanto enviamos ajuda.'],
         'action': 'prompt_call',
         'options': ['Sim', 'Não']
