@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { enviarDados } from '../Api/Ocorrencia';
-import { db } from '../config/firebase';
+import { enviarDados } from '../../Api/Ocorrencia';
+import { db } from '../../config/firebase';
 
-const ChatComponent = () => {
+const ChatComponent2 = () => {
     const [message, setMessage] = useState('');
     const [chat, setChat] = useState([]);
     const [awaitingDescription, setAwaitingDescription] = useState(false);
@@ -139,4 +139,4 @@ const ChatComponent = () => {
     );
 };
 
-export default ChatComponent;
+export default ChatComponent2;

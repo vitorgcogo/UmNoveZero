@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { collection, addDoc, onSnapshot, orderBy, query, doc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, orderBy, query, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { enviarDados, updateStatus } from '../../Api/Ocorrencia';
 
@@ -15,6 +15,7 @@ const ChatComponent2 = () => {
     const [awaitingDescription, setAwaitingDescription] = useState(false);
     const [showRestartButton, setShowRestartButton] = useState(false);
     const [status, setStatus] = useState(null);
+    const [awaitingType, setAwaitingType] = useState(false);
 
     const [description, setDescription] = useState('');
 
@@ -66,18 +67,19 @@ const ChatComponent2 = () => {
                 roomId: roomId,
                 timestamp: new Date()
             });
-
-            setDescription(newMessage)
+    
             setNewMessage('');
-
+    
             if (awaitingDescription) {
+                setDescription(newMessage);
+                setAwaitingDescription(false);
+    
                 await addDoc(collection(db, 'conversations', roomId, 'messages'), {
                     text: "Por favor, permita a localização para prosseguir.",
                     sender: 'bot',
                     roomId: roomId,
                     timestamp: new Date()
                 });
-                setAwaitingDescription(false);
                 setTimeout(handleLocationPermission, 1500);
             } else {
                 axios.post('http://localhost:5000/chatbot', { message: newMessage })
@@ -105,41 +107,74 @@ const ChatComponent2 = () => {
     };
 
     const handleOptionClick = async (option) => {
-        if (option === "Sim") {
+        if (option === "Sim" && !awaitingType) {
+            // Perguntar o tipo da ocorrência
             await addDoc(collection(db, 'conversations', roomId, 'messages'), {
-                text: "Sim",
+                text: "Qual o tipo da ocorrência?",
+                sender: 'bot',
+                roomId: roomId,
+                timestamp: new Date()
+            });
+            setAwaitingType(true);
+        } else if (awaitingType) {
+            // Salvar o tipo de ocorrência escolhido pelo usuário
+            await addDoc(collection(db, 'conversations', roomId, 'messages'), {
+                text: option, // O tipo de ocorrência escolhido pelo usuário
                 sender: 'user',
                 roomId: roomId,
                 timestamp: new Date()
             });
-
             await addDoc(collection(db, 'conversations', roomId, 'messages'), {
                 text: "Por favor, descreva o ocorrido.",
                 sender: 'bot',
                 roomId: roomId,
                 timestamp: new Date()
             });
+            setAwaitingType(false);
             setAwaitingDescription(true);
-        } else {
+        } else if (option === "Não") {
             await addDoc(collection(db, 'conversations', roomId, 'messages'), {
                 text: "Não",
                 sender: 'user',
                 roomId: roomId,
                 timestamp: new Date()
             });
-
             await addDoc(collection(db, 'conversations', roomId, 'messages'), {
-                text: "Obrigado pela conversa. ",
+                text: "Obrigado pela conversa.",
                 sender: 'bot',
                 roomId: roomId,
                 timestamp: new Date()
             });
-            updateStatus(roomId, 'cancel')
-
+            updateStatus(roomId, 'cancel');
             setShowRestartButton(true);
         }
     };
 
+    const handleOcorrenciaTypeSelection = async (ocorrenciaType) => {
+        const roomRef = doc(db, 'conversations', roomId);
+        
+        // Update the 'TipoOcorrencia' in the database
+        await updateDoc(roomRef, { TipoOcorrencia: ocorrenciaType });
+        
+        await addDoc(collection(db, 'conversations', roomId, 'messages'), {
+            text: ocorrenciaType,
+            sender: 'user',
+            roomId: roomId,
+            timestamp: new Date()
+        });
+        
+        // After storing the type of occurrence, prompt for description
+        await addDoc(collection(db, 'conversations', roomId, 'messages'), {
+            text: "Por favor, descreva o ocorrido.",
+            sender: 'bot',
+            roomId: roomId,
+            timestamp: new Date()
+        });
+        
+        setAwaitingDescription(true);
+    };
+    
+    
 
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
@@ -150,6 +185,8 @@ const ChatComponent2 = () => {
     const handleLocationPermission = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async position => {
+
+                setDescription(newMessage);
 
                 enviarDados(roomId, newMessage, position.coords.latitude, position.coords.longitude)
                 updateStatus(roomId, 'Espera')
@@ -171,17 +208,34 @@ const ChatComponent2 = () => {
                 {messages.map((msg, index) => (
                     <div key={msg.id} className={msg.sender}>
                         {msg.text}
-                        {msg.type === 'option' &&  status == null && (
+                        {msg.type === 'option' && status == null && !awaitingType && (
                             <div className="options">
                                 <button className='btn btn-primary mx-2' onClick={() => handleOptionClick("Sim")}>Sim</button>
                                 <button className='btn btn-danger mx-2' onClick={() => handleOptionClick("Não")}>Não</button>
                             </div>
                         )}
+                        {msg.text === "Qual o tipo da ocorrência?" && (
+                            <div className="options">
+                                <div className="options-row">
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Assalto")}>Assalto</button>
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Roubo")}>Roubo</button>
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Furto")}>Furto</button>
+                                </div>
+                                <div className="options-row">
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Invasão")}>Invasão</button>
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Outro")}>Outro</button>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
                 ))}
+
+
+
                 <div ref={endOfChatRef}></div>
             </div>
-            
+
             <form className="message-form" onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
                 {status == null ?
                     <>

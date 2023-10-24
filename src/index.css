@@ -256,12 +256,24 @@ p{
 /* Opções de resposta */
 .options {
     display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; /* Espaçamento entre as linhas de botões */
+}
+
+.options-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Espaçamento entre os botões */
+    /* flex-wrap: wrap; Permite que os itens se envolvam quando o espaço é limitado */
+    max-width: 90%; /* Defina a largura máxima da linha de botões, ajuste conforme necessário */
 }
 
 .options .btn {
-    width: 48%; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
 }
 
 /* Barra de entrada */
