@@ -18,12 +18,14 @@ intents = {
         'responses': ['Olá, como posso ajudar?', 'Oi, o que posso fazer por você hoje?', 'Olá, em que posso ser útil?']
     },
     'relatar_crime': {
-        'patterns': ['quero relatar um crime', 'fui roubado', 'tenho uma denúncia', 'fui assaltado', 'meu carro foi roubado', 'minha casa foi invadida'],
+        'patterns': ['quero relatar um crime', 'fui roubado', 'tenho uma denúncia', 'fui assaltado', 'meu carro foi roubado', 'minha casa foi invadida', 'vitima de golpe', 'golpe do pix'],
         'responses': ['Por favor, forneça mais detalhes sobre o crime.', 'Qual é a natureza do crime que você gostaria de relatar?', 'Entendi. Por favor, descreva o ocorrido.'],
         'action': 'prompt_details'
     },
     'emergencia': {
-        'patterns': ['invadiram minha casa', 'invadiram meu apartamento', 'preciso de ajuda', 'estou em perigo', 'socorro', 'estou sendo atacado', 'alguém está me seguindo', 'ouvi tiros'],
+        'patterns': ['invadiram minha casa', 'invadiram meu apartamento', 'preciso de ajuda', 'estou em perigo', 'socorro', 'estou sendo atacado', 'alguém está me seguindo', 
+                     'ouvi tiros', 'acidente de carro', 'acidente de transito', 'bateram no meu carro', 'bateram em uma mulher', 'agrediram uma mulher', 'vizinho com som alto', 'carro com som alto', 'musica barulhenta', 
+                     'fui agredida', 'fui agredido', 'trafico de drogas', 'fui assediada', 'vitima de assédio', 'maus-tratos com animais', 'pessoas em perigo'],
         'responses': ['Estamos enviando ajuda imediatamente. Por favor, fique seguro.', 'Permaneça onde está. Ajuda está a caminho.', 'Entendi. Mantenha-se em um local seguro enquanto enviamos ajuda.'],
         'action': 'prompt_call',
         'options': ['Sim', 'Não']

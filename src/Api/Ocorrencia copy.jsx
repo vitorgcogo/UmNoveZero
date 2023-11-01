@@ -17,16 +17,16 @@ export const enviarDados = async (roomId, descricao, latitude, longitude) => {
     }
 };
 
-export const obterDadosId = async (roomId) => {
+export const obterDadosId = async (roomId, setData) => {
     const docRef = doc(db, "conversations", roomId);
     const docSnapshot = await getDoc(docRef);
 
     if (docSnapshot.exists()) {
         console.log("Detalhes da conversa:", docSnapshot.data());
-        return docSnapshot.data(); // Retorna os dados da conversa
+        setData(docSnapshot.data()); // Retorna os dados da conversa
     } else {
         console.log("Nenhum documento encontrado com esse ID!");
-        return null; // Retorna null se nenhum documento foi encontrado
+        setData(null); // Retorna null se nenhum documento foi encontrado
     }
 }
 

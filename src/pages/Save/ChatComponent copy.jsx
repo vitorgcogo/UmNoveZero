@@ -1,52 +1,140 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { collection, addDoc, onSnapshot, orderBy , query } from 'firebase/firestore';
+import axios from 'axios';
+import { enviarDados } from '../../Api/Ocorrencia';
 import { db } from '../../config/firebase';
 
 const ChatComponent2 = () => {
-    const { roomId } = useParams();
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
+    const [message, setMessage] = useState('');
+    const [chat, setChat] = useState([]);
+    const [awaitingDescription, setAwaitingDescription] = useState(false);
+    const [showRestartButton, setShowRestartButton] = useState(false);
+    const [awaitingTypeOfCrime, setAwaitingTypeOfCrime] = useState(false);
+
+    const handleTypeOfCrime = (type) => {
+        setChat(prevChat => [...prevChat, { text: type, sender: 'user' }]);
+        setChat(prevChat => [...prevChat, { text: "Por favor, descreva o ocorrido.", sender: 'bot' }]);
+        setAwaitingTypeOfCrime(false);
+        setAwaitingDescription(true);
+    };
+
+    const renderTypeSelection = () => {
+        if (awaitingTypeOfCrime) {
+            return (
+                <div className="options">
+                    <button className='btn btn-primary mx-2' onClick={() => handleTypeOfCrime("Acidente")}>Acidente</button>
+                    <button className='btn btn-primary mx-2' onClick={() => handleTypeOfCrime("Assalto")}>Assalto</button>
+                    <button className='btn btn-primary mx-2' onClick={() => handleTypeOfCrime("Roubo")}>Roubo</button>
+                    <button className='btn btn-primary mx-2' onClick={() => handleTypeOfCrime("Outros")}>Outros</button>
+                </div>
+            );
+        }
+        return null;
+    };
+
+    const endOfChatRef = React.useRef(null);
+
+    const scrollToBottom = () => {
+        endOfChatRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
 
     useEffect(() => {
-        if (roomId) {
-            const messagesCollection = query(
-                collection(db, 'conversations', roomId, 'messages'),
-                orderBy('timestamp', 'asc')
-            );
-            const unsubscribe = onSnapshot(messagesCollection, (snapshot) => {
-                const fetchedMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setMessages(fetchedMessages);
+        scrollToBottom();
+    }, [chat]);
+
+    useEffect(() => {
+        axios.get('http://localhost:5000/welcome_message')
+            .then(response => {
+                setChat([...chat, { text: response.data.response, sender: 'bot' }]);
             });
-            return () => unsubscribe();
+    }, []);
+
+    const handleSendMessage = () => {
+        if (message.trim()) {
+            setChat(prevChat => [...prevChat, { text: message, sender: 'user' }]);
+            setMessage('');
+
+            if (awaitingDescription) {
+                setChat(prevChat => [...prevChat, { text: "Por favor, permita a localização para prosseguir.", sender: 'bot' }]);
+                setAwaitingDescription(false);
+                setTimeout(() => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(async position => {
+                            enviarDados(message, position.coords.latitude, position.coords.longitude);
+                            setChat(prevChat => [...prevChat, { text: "Localização registrada. Obrigado por informar.", sender: 'bot' }]);
+                        });
+                    } else {
+                        console.error("Geolocation não suportada pelo navegador.");
+                        setChat(prevChat => [...prevChat, { text: "Seu navegador não suporta geolocalização. Tente novamente em outro dispositivo.", sender: 'bot' }]);
+                    }
+                }, 1500);
+                return;
+            }
+
+            axios.post('http://localhost:5000/chatbot', { message })
+                .then(response => {
+                    const botResponse = response.data.response;
+                    const detectedIntent = response.data.intent;
+                    const action = response.data.action;
+
+                    setChat(prevChat => [...prevChat, { text: botResponse, sender: 'bot' }]);
+
+                    if (detectedIntent === 'relatar_crime' || detectedIntent === 'emergencia' || action === 'prompt_call') {
+                        setChat(prevChat => [...prevChat,
+                        { text: "Você gostaria de registrar um chamado?", sender: 'bot', type: 'option' }]);
+                    }
+                });
         }
-    }, [roomId]);
+    };
+
+    const handleRestartConversation = () => {
+        setChat(prevChat => [...prevChat, { text: "Olá! Como posso ajudar?", sender: 'bot' }]);
+        setShowRestartButton(false);
+    };
+
+    const handleOptionClick = (option) => {
+        if (option === "Sim") {
+            setChat(prevChat => [...prevChat, { text: "Sim", sender: 'user' }]);
+            setChat(prevChat => [...prevChat, { text: "Qual o tipo da ocorrência?", sender: 'bot' }]);
+            setAwaitingTypeOfCrime(true);
+        } else {
+            setChat(prevChat => [...prevChat, { text: "Não", sender: 'user' }]);
+            setChat(prevChat => [...prevChat, { text: "Obrigado pela conversa. ", sender: 'bot' }]);
+            setShowRestartButton(true);
+        }
+    };
     
 
-    const sendMessage = async (e) => {
-        e.preventDefault();
-        if (newMessage.trim() !== '') {
-            await addDoc(collection(db,'conversations', roomId, 'messages'), {
-                text: newMessage,
-                roomId: roomId,
-                timestamp: new Date()
-            });
-            setNewMessage('');
+    const handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            handleSendMessage();
         }
     };
 
     return (
-        <div className="chat-container">
-            <h3>Chat</h3>
-            <div className="message-list">
-                {messages.map(message => (
-                    <div key={message.id} className={`message ${message.sender}`}>{message.text}</div>
+        <div className='container mt-1'>
+            <div className="chat-box">
+                {chat.map((msg, index) => (
+                    <div key={index} className={msg.sender}>
+                        {msg.text}
+                        {msg.type === 'option' && (
+                            <div>
+                                <button onClick={() => handleOptionClick("Sim")}>Sim</button>
+                                <button onClick={() => handleOptionClick("Não")}>Não</button>
+                            </div>
+                        )}
+                    </div>
                 ))}
+                <div ref={endOfChatRef}></div>
             </div>
-            <form className="message-form" onSubmit={sendMessage}>
-                <input className="message-input" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Digite sua mensagem" />
-                <button className="send-button" type="submit">Enviar</button>
-            </form>
+
+            {renderTypeSelection()}
+
+            {showRestartButton && <button onClick={handleRestartConversation}>Iniciar nova conversa</button>}
+
+            <div className="chat-input">
+                <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} onKeyPress={handleKeyPress} />
+                <button onClick={handleSendMessage}>Enviar</button>
+            </div>
         </div>
     );
 };

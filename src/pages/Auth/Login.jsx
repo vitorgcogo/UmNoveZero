@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as yup from 'yup';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logInWithEmailAndPassword } from '../../config/firebase';
+import appLogo from '../../assets/img/logo.png';
 
 function Login() {
     const [inputs, setInputs] = useState({});
@@ -57,28 +58,33 @@ function Login() {
 
     return (
         <>
-            <div className="container mt-5">
-                <div className="row justify-content-center">
-                    <div className="col-md-6">
-                        <div className="card">
-                            <div className="card-body">
-                                <h5 className="card-title text-center mb-4">Login</h5>
-                                <form onSubmit={handleSubmit}>
-                                    <div className="mb-3">
-                                        <label htmlFor="email" className="form-label">Endereço de email</label>
-                                        <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="password" className="form-label">Senha</label>
-                                        <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} />
-                                    </div>
-                                    <button type="submit" className="btn btn-primary w-100">Entrar</button>
-                                </form>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+                <img src={appLogo} alt="App Logo" style={{ width: '200px'}} />
+
+                <div className="container">
+                    <div className="row justify-content-center">
+                        <div className="col-md-6">
+                            <div className="card">
+                                <div className="card-body">
+                                    <h5 className="card-title text-center mb-4">Login</h5>
+                                    <form onSubmit={handleSubmit}>
+                                        <div className="mb-3">
+                                            <label htmlFor="email" className="form-label">Endereço de email</label>
+                                            <input type="email" className="form-control" name="email" id="email" aria-describedby="emailHelp" onChange={handleChange} value={inputs?.email} />
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="password" className="form-label">Senha</label>
+                                            <input type="password" className="form-control" name="senha" id="password" onChange={handleChange} value={inputs?.senha} />
+                                        </div>
+                                        <button type="submit" className="btn btn-primary w-100">Entrar</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             {modalOpen && response && (
                 <div className="modal" tabIndex="-1" role="dialog" style={{ display: 'block', background: '#101010c2' }}>

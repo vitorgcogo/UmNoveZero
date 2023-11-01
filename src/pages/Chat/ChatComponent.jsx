@@ -206,7 +206,7 @@ const ChatComponent2 = () => {
             <div className="message-list" id='t'>
 
                 {messages.map((msg, index) => (
-                    <div key={msg.id} className={msg.sender}>
+                    <div key={index} className={msg.sender}>
                         {msg.text}
                         {msg.type === 'option' && status == null && !awaitingType && (
                             <div className="options">
@@ -215,19 +215,18 @@ const ChatComponent2 = () => {
                             </div>
                         )}
                         {msg.text === "Qual o tipo da ocorrência?" && (
-                            <div className="options">
+                            <div className="options2">
                                 <div className="options-row">
                                     <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Assalto")}>Assalto</button>
                                     <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Roubo")}>Roubo</button>
-                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Furto")}>Furto</button>
-                                </div>
-                                <div className="options-row">
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Acidente")}>Acidente</button>
                                     <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Invasão")}>Invasão</button>
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Agressão")}>Agressão</button>
+                                    <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Perturbação da Paz")}>Perturbação da Paz</button>
                                     <button className='btn btn-primary mx-2' onClick={() => handleOcorrenciaTypeSelection("Outro")}>Outro</button>
                                 </div>
                             </div>
                         )}
-
                     </div>
                 ))}
 

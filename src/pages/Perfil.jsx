@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { signOut, getAuth } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { getUserData, auth } from '../config/firebase';
+import avatarImage from '../assets/img/user.png';
 
 const Perfil = () => {
     const [userData, setUserData] = useState({});
@@ -40,6 +41,11 @@ const Perfil = () => {
                             Perfil
                         </div>
                         <div className="card-body">
+                            <img 
+                                src={avatarImage}
+                                alt="Avatar do usuário"
+                                style={{ width: "80px", height: "80px", borderRadius: "50%", marginBottom: "20px" }}
+                            />
                             <h5 className="card-title">Nome: {userData?.nome || 'N/A'}</h5>
                             <p className='black-text'>Email: {userData?.email || 'N/A'}</p>
                             <p className='black-text'>Telefone: {userData?.telefone || 'N/A'}</p>

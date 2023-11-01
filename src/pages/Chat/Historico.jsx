@@ -4,27 +4,40 @@ import { db, auth } from '../../config/firebase';
 
 const Historico = () => {
     const [rooms, setRooms] = useState([]);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
         const fetchRooms = async () => {
             if(auth.currentUser) {
-                const userId = auth.currentUser.uid; // Obtenha o UID do usuário autenticado
-
+                const userId = auth.currentUser.uid; 
+    
                 const roomsCollection = query(
                     collection(db, 'conversations'),
-                    where('userId', '==', userId),  // Filtra conversas pelo ID do usuário
-                    orderBy('timestamp', 'desc') // Ordenando pela timestamp em ordem decrescente
+                    where('userId', '==', userId),
+                    orderBy('timestamp', 'desc')
                 );
-
+    
                 const roomsSnapshot = await getDocs(roomsCollection);
                 setRooms(roomsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             } else {
                 console.error("Nenhum usuário autenticado.");
             }
         };
-
-        fetchRooms();
+    
+        // Observador para mudanças no estado de autenticação
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            if (user) {
+                fetchRooms();
+            } else {
+                console.error("Nenhum usuário autenticado.");
+            }
+            setIsLoaded(true); // Marcar que o estado de autenticação foi verificado
+        });
+    
+        // Limpar o observador quando o componente for desmontado
+        return () => unsubscribe();
     }, []);
+    
 
     const createNewConversation = async () => {
         if (!auth.currentUser) {
@@ -50,6 +63,9 @@ const Historico = () => {
 
         window.location.href = `/chat/${newRoomRef.id}`;
     };
+    if (!isLoaded) {
+        return <div>Carregando...</div>;
+    }
 
     return (
         <div className="conversation-list">

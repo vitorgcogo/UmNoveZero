@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { getDoc, doc, collection, addDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 import { obterDadosId, updateStatus } from '../../../Api/Ocorrencia';
+import { getAuth } from 'firebase/auth';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import IMG from '../../../assets/img/pin.png'
@@ -13,11 +14,21 @@ const ChatPolice = () => {
     const { roomId } = useParams();
     const [messages, setMessages] = useState([]);
     const [data, setData] = useState([]);
+    const [nome, setNome] = useState([]);
+
+    const [userData, setUserData] = useState({});
 
     const endOfChatRef = React.useRef(null);
 
     const [actionTaken, setActionTaken] = useState(null);  // "sendPolice", "rejectCall", ou null
 
+    const fetchUserName = async (userId) => {
+        const userDoc = await getDoc(doc(db, 'users', userId)); // Ajuste 'users' para o nome correto da coleção de usuários
+        if (userDoc.exists()) {
+            return userDoc.data().nome; // ou o campo que armazena o nome do usuário
+        }
+        return null;
+    };    
 
     const scrollToBottom = () => {
         endOfChatRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -28,14 +39,35 @@ const ChatPolice = () => {
     }, [messages]);
 
     useEffect(() => {
-        obterDadosId(roomId, setData);
-    }, [roomId]);
-
+        const fetchNome = async () => {
+            const docRef = doc(db, "usuarios", data?.userId);
+            const docSnapshot = await getDoc(docRef);
+    
+            if (docSnapshot.exists()) {
+                setNome(docSnapshot.data().nome); // supondo que você esteja tentando obter o campo "nome" do documento
+            }
+        }; 
+        fetchNome();
+    }, [data]);
+    
 
     useEffect(() => {
         obterDadosId(roomId, setData);
-    }, [actionTaken]);
-    
+    }, [roomId, actionTaken]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const chamadoData = await obterDadosId(roomId);
+            if (chamadoData?.userId) {
+                const userName = await fetchUserName(chamadoData.userId);
+                setData({
+                    ...chamadoData,
+                    userName: userName
+                });
+            }
+        };
+        fetchData();
+    }, [roomId]);    
 
     const sendMessageAsPolice = async (response) => {
         if (roomId) {
@@ -128,7 +160,7 @@ const ChatPolice = () => {
             <div className="container mt-1">
                 <div className="row">
                     <div className="col-md-6">
-                        <p><strong>Nome:</strong> {data.name}</p>
+                        <p><strong>Nome:</strong> {nome}</p>
                         <p><strong>Descrição:</strong> {data.descricao}</p>
                         <p><strong>Status:</strong> {data?.status == true ? 'Chamado Aceito' : data?.status == false ? 'Chamado Recusado' : 'Pendente'}</p>
                         <p><strong>Data e Hora:</strong> {data.timestamp?.toDate().toLocaleString()}</p>
