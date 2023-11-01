@@ -1,6 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { getAuth, signOut } from 'firebase/auth';
+
 
 function NavBar() {
+
+    const auth = getAuth();
+
+    // Função de logout
+    const logout = () => {
+        signOut(auth).then(() => {
+            // Redirecionar para a página de login após logout
+            window.location.href = '/login';
+        }).catch((error) => {
+            // An error happened.
+            console.error('Logout failed', error);
+        });
+    };
 
 
     return (
@@ -19,8 +34,8 @@ function NavBar() {
                             <li class="nav-item">
                                 <a class="nav-link" href="/admin/chamado">Chamados</a>
                             </li>
+                            <button onClick={logout} className="btn btn-outline-danger" type="button">Deslogar</button>
 
-                            
                         </ul>
 
                     </div>
