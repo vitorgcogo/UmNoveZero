@@ -33,7 +33,7 @@ const HeatMap = () => {
     
         map.on('load', () => {
             // Filtrar apenas os pontos com status de chamado aceito
-            const filteredData = data.filter(point => point.status === true);
+            const filteredData = data.filter(point => point.status === true && point.longitude && point.latitude);
     
             map.addSource('points', {
                 type: 'geojson',
