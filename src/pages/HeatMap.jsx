@@ -67,10 +67,22 @@ const HeatMap = () => {
         <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
             <div id="map" style={{ width: '100%', height: '100vh' }}></div>
             <select className='custom-select'
-                style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1 }}
+                style={{
+                    position: 'absolute',
+                    top: '10px',
+                    left: '10px',
+                    zIndex: 1,  // Isso garante que o seletor esteja acima do mapa
+                }}
                 onChange={e => setFilterType(e.target.value)}
             >
-                {/* Opções do dropdown */}
+                <option className="custom-dropdown-option" value="">Todos os tipos</option>
+                <option className="custom-dropdown-option" value="Assalto">Assalto</option>
+                <option className="custom-dropdown-option" value="Roubo">Roubo</option>
+                <option className="custom-dropdown-option" value="Acidente">Acidente</option>
+                <option className="custom-dropdown-option" value="Invasão">Invasão</option>
+                <option className="custom-dropdown-option" value="Agressão">Agressão</option>
+                <option className="custom-dropdown-option" value="Perturbação da Paz">Perturbação da Paz</option>
+                <option className="custom-dropdown-option" value="Outros">Outros</option>
             </select>
         </div>
     );
