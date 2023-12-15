@@ -5,8 +5,6 @@ import Principal from "./pages/Principal";
 import AuthRoute from "./AuthRoute";
 import Login from "./pages/Auth/Login";
 import Layout from "./pages/Layout";
-// import ChatComponent from "./pages/ChatComponent";
-// import Chat from "./pages/Chat";
 import ChatComponent2 from "./pages/Chat/ChatComponent";
 import Historico from "./pages/Chat/Historico";
 import PoliceDashboard from "./pages/PoliceDashboard";

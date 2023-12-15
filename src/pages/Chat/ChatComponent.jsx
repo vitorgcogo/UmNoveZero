@@ -5,6 +5,7 @@ import axios from 'axios';
 import { collection, addDoc, onSnapshot, orderBy, query, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { enviarDados, updateStatus } from '../../Api/Ocorrencia';
+import { FaRobot } from 'react-icons/fa';
 
 
 const ChatComponent2 = () => {
@@ -205,8 +206,9 @@ const ChatComponent2 = () => {
             </div>
             <div className="message-list" id='t'>
 
-                {messages.map((msg, index) => (
-                    <div key={index} className={msg.sender}>
+            {messages.map((msg, index) => (
+                    <div key={index} className={`message ${msg.sender}`}>
+                        {msg.sender === 'bot' && <FaRobot className="bot-icon" />}
                         {msg.text}
                         {msg.type === 'option' && status == null && !awaitingType && (
                             <div className="options">

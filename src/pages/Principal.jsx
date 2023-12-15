@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import ChatComponent from './ChatComponent';
 import { NavLink } from 'react-router-dom';
-import ImgLogo from '../assets/img/5.png'
+import ImgLogo from '../assets/img/logo2.png'
 const Principal = () => {
 
     return (
